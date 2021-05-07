@@ -10,7 +10,6 @@ import android.content.IntentSender;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import androidx.appcompat.app.AppCompatActivity;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
@@ -25,12 +24,9 @@ import com.google.android.play.core.install.model.InstallStatus;
 import com.google.android.play.core.install.model.UpdateAvailability;
 import com.google.android.play.core.tasks.Task;
 
-@NativePlugin(requestCodes = { AppUpdate.REQUEST_IMMEDIATE_UPDATE, AppUpdate.REQUEST_FLEXIBLE_UPDATE })
-public class AppUpdate extends Plugin {
-    /** Request code for immediate update */
-    protected static final int REQUEST_IMMEDIATE_UPDATE = 10;
-    /** Request code for flexible update */
-    protected static final int REQUEST_FLEXIBLE_UPDATE = 11;
+@NativePlugin(name = "AppUpdate", requestCodes = { AppUpdatePlugin.REQUEST_IMMEDIATE_UPDATE, AppUpdatePlugin.REQUEST_FLEXIBLE_UPDATE })
+public class AppUpdatePlugin extends Plugin {
+    public static final String ERROR_GET_APP_INFO_FAILED = "Unable to get app info.";
     /** Update result: update ok. */
     public static final int UPDATE_OK = 0;
     /** Update result: update canceled. */
@@ -43,6 +39,10 @@ public class AppUpdate extends Plugin {
     public static final int UPDATE_NOT_ALLOWED = 4;
     /** Update result: update info missing. */
     public static final int UPDATE_INFO_MISSING = 5;
+    /** Request code for immediate update */
+    protected static final int REQUEST_IMMEDIATE_UPDATE = 10;
+    /** Request code for flexible update */
+    protected static final int REQUEST_FLEXIBLE_UPDATE = 11;
     private AppUpdateManager appUpdateManager;
     private AppUpdateInfo appUpdateInfo;
     private InstallStateUpdatedListener listener;
@@ -61,7 +61,7 @@ public class AppUpdate extends Plugin {
                 try {
                     pInfo = this.getPackageInfo();
                 } catch (PackageManager.NameNotFoundException e) {
-                    call.reject("Unable to get App Info");
+                    call.reject(ERROR_GET_APP_INFO_FAILED);
                     return;
                 }
                 JSObject ret = new JSObject();
@@ -107,7 +107,7 @@ public class AppUpdate extends Plugin {
                     this.appUpdateInfo,
                     AppUpdateType.IMMEDIATE,
                     getActivity(),
-                    AppUpdate.REQUEST_IMMEDIATE_UPDATE
+                    AppUpdatePlugin.REQUEST_IMMEDIATE_UPDATE
                 );
         } catch (IntentSender.SendIntentException e) {
             call.reject(e.getMessage());
@@ -138,7 +138,7 @@ public class AppUpdate extends Plugin {
                     this.appUpdateInfo,
                     AppUpdateType.FLEXIBLE,
                     getActivity(),
-                    AppUpdate.REQUEST_FLEXIBLE_UPDATE
+                    AppUpdatePlugin.REQUEST_FLEXIBLE_UPDATE
                 );
         } catch (IntentSender.SendIntentException e) {
             call.reject(e.getMessage());
